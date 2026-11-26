@@ -88,7 +88,7 @@ def load_onnx_models() -> None:
     
     files = [
         "whisper_encoder_int8.onnx",
-        "whisper_encoder.onnx.data",
+        #"whisper_encoder.onnx.data",
         "whisper_decoder_int8.onnx",
     ]
     token = os.getenv("HF_TOKEN") or None
