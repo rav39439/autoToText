@@ -1,0 +1,134 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audio transcription</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #172033; background: #f3f6fb; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
+    main { width: min(100%, 680px); padding: clamp(24px, 5vw, 48px); background: white; border: 1px solid #e2e8f0; border-radius: 20px; box-shadow: 0 20px 60px #1d355710; }
+    .eyebrow { color: #5368d8; font-size: .78rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 10px 0; font-size: clamp(2rem, 5vw, 2.7rem); letter-spacing: -.04em; }
+    .intro { margin: 0 0 28px; color: #687386; line-height: 1.6; }
+    .drop { display: grid; place-items: center; gap: 12px; min-height: 190px; padding: 24px; text-align: center; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8faff; transition: .2s; }
+    .drop.dragging { border-color: #5368d8; background: #f0f3ff; }
+    .icon { display: grid; place-items: center; width: 48px; height: 48px; color: #5368d8; background: #e9edff; border-radius: 14px; font-size: 1.35rem; }
+    .drop strong { display: block; margin-bottom: 4px; }
+    .hint { color: #7b8494; font-size: .88rem; }
+    input[type=file] { max-width: 100%; color: #687386; }
+    button { width: 100%; margin-top: 18px; padding: 14px 18px; color: white; background: #5368d8; border: 0; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover { background: #4357c2; }
+    button:disabled { cursor: wait; opacity: .65; }
+    #status { min-height: 24px; margin: 16px 0 0; color: #687386; font-size: .9rem; }
+    #progress { display: none; width: 100%; height: 10px; margin-top: 10px; accent-color: #5368d8; }
+    #result { display: none; margin-top: 22px; padding: 20px; background: #f8faff; border: 1px solid #e5eaf4; border-radius: 12px; }
+    #result h2 { margin: 0 0 8px; font-size: 1rem; }
+    #language { display: inline-block; margin-bottom: 18px; padding: 5px 10px; color: #4357c2; background: #e9edff; border-radius: 999px; font-size: .85rem; font-weight: 700; }
+    #transcription { margin: 0; line-height: 1.65; white-space: pre-wrap; }
+    .error { color: #b42318 !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Whisper speech recognition</div>
+    <h1>Turn audio into text</h1>
+    <p class="intro">Upload a WAV, FLAC, or OGG file and Whisper will identify its language and transcribe the speech.</p>
+    <form id="upload-form">
+      <label class="drop" id="drop-area" for="audio-file">
+        <span class="icon" aria-hidden="true">â™«</span>
+        <span><strong>Choose an audio file</strong><span class="hint">WAV, FLAC, or OGG Â· up to 100 MB</span></span>
+        <input id="audio-file" name="file" type="file" accept=".wav,.flac,.ogg" required>
+      </label>
+      <button id="submit-button" type="submit">Transcribe audio</button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <progress id="progress" max="100" value="0" aria-label="Transcription progress"></progress>
+    <section id="result" aria-live="polite">
+      <h2>Detected language</h2>
+      <span id="language"></span>
+      <h2>Transcription</h2>
+      <p id="transcription"></p>
+    </section>
+  </main>
+  <script>
+    const form = document.querySelector('#upload-form');
+    const input = document.querySelector('#audio-file');
+    const drop = document.querySelector('#drop-area');
+    const button = document.querySelector('#submit-button');
+    const status = document.querySelector('#status');
+    const progress = document.querySelector('#progress');
+    const result = document.querySelector('#result');
+
+    for (const eventName of ['dragenter', 'dragover']) {
+      drop.addEventListener(eventName, event => { event.preventDefault(); drop.classList.add('dragging'); });
+    }
+    for (const eventName of ['dragleave', 'drop']) {
+      drop.addEventListener(eventName, event => { event.preventDefault(); drop.classList.remove('dragging'); });
+    }
+    drop.addEventListener('drop', event => {
+      if (event.dataTransfer.files.length) {
+        input.files = event.dataTransfer.files;
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+    input.addEventListener('change', () => {
+      const name = input.files[0]?.name;
+      if (name) status.textContent = `Selected: ${name}`;
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const audio = input.files[0];
+      if (!audio) return;
+      const data = new FormData();
+      data.append('file', audio);
+      button.disabled = true;
+      result.style.display = 'none';
+      status.classList.remove('error');
+      progress.value = 0;
+      progress.style.display = 'block';
+      status.textContent = 'Uploading audio…';
+      try {
+        const response = await fetch('/transcribe', { method: 'POST', body: data });
+        if (!response.ok) {
+          const errorPayload = await response.json();
+          throw new Error(errorPayload.detail || 'Transcription failed.');
+        }
+        status.textContent = 'Transcribing audio…';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let payload;
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line) continue;
+            const update = JSON.parse(line);
+            if (update.progress !== undefined) progress.value = update.progress;
+            if (update.error) throw new Error(update.error);
+            if (update.done) payload = update;
+          }
+          if (done) break;
+        }
+        if (!payload) throw new Error('Transcription failed.');
+        document.querySelector('#language').textContent = payload.language;
+        document.querySelector('#transcription').textContent = payload.transcription || 'No speech was detected.';
+        result.style.display = 'block';
+        status.textContent = 'Transcription complete.';
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add('error');
+      } finally {
+        progress.style.display = 'none';
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
+

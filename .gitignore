@@ -1,0 +1,60 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+myenv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Hugging Face tokens and caches
+.cache/
+huggingface_cache/
+models--*/
+HF_TOKEN*
+
+# ONNX models and external weights
+*.onnx
+*.onnx.data
+
+# PyTorch checkpoints and training weights
+*.pth
+*.pt
+*.ckpt
+*.weights
+
+# Audio datasets and files
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
