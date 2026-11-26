@@ -103,10 +103,10 @@ def load_onnx_models() -> None:
     providers = ["CPUExecutionProvider"]
     processor = WhisperProcessor.from_pretrained(WHISPER_PROCESSOR_ID)
     encoder = ort.InferenceSession(
-        str(MODEL_DIR / "whisper_encoder.onnx"), providers=providers
+        str(MODEL_DIR / "whisper_encoder_int8.onnx"), providers=providers
     )
     decoder = ort.InferenceSession(
-        str(MODEL_DIR / "whisper_decoder.onnx"), providers=providers
+        str(MODEL_DIR / "whisper_decoder_int8.onnx"), providers=providers
     )
     encoder_session = encoder
     decoder_session = decoder
