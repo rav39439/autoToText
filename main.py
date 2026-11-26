@@ -20,18 +20,47 @@ from transformers.models.whisper.tokenization_whisper import LANGUAGES
 
 # Model files are downloaded from Hugging Face. Audio is only accepted from
 # the upload endpoint and is removed from the temporary directory afterwards.
+# BASE_DIR = Path(__file__).resolve().parent
+# TEMPLATES_DIR = BASE_DIR / "templates"
+# MODEL_DIR = BASE_DIR / "whisper_onnx"
+# REPO_ID = "rav39439/summerization-model"
+# TASK = "transcribe"
+# WHISPER_PROCESSOR_ID = "openai/whisper-base"
+# MAX_GENERATION_TOKENS = 200
+# MAX_UPLOAD_SIZE = 100 * 1024 * 1024
+# SUPPORTED_AUDIO_TYPES = {".wav", ".flac", ".ogg"}
+# SAMPLE_RATE = 16_000
+# N_SAMPLES = SAMPLE_RATE * 30
+# MODEL_DIR = Path("/tmp/models")
+# MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
 BASE_DIR = Path(__file__).resolve().parent
+
 TEMPLATES_DIR = BASE_DIR / "templates"
-MODEL_DIR = BASE_DIR / "whisper_onnx"
+
+# Render temporary model directory
+MODEL_DIR = Path("/tmp/models")
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
 REPO_ID = "rav39439/summerization-model"
+
 TASK = "transcribe"
+
 WHISPER_PROCESSOR_ID = "openai/whisper-base"
+
 MAX_GENERATION_TOKENS = 200
+
 MAX_UPLOAD_SIZE = 100 * 1024 * 1024
+
 SUPPORTED_AUDIO_TYPES = {".wav", ".flac", ".ogg"}
+
 SAMPLE_RATE = 16_000
+
 N_SAMPLES = SAMPLE_RATE * 30
 
+# INT8 model filenames
+ENCODER_MODEL = "whisper_encoder_int8.onnx"
+DECODER_MODEL = "whisper_decoder_int8.onnx"
 encoder_session: Any = None
 decoder_session: Any = None
 whisper_processor: Any = None
@@ -56,8 +85,7 @@ def load_onnx_models() -> None:
     ):
         return
 
-    MODEL_DIR = Path("/tmp/models")
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    
     files = [
         "whisper_encoder_int8.onnx",
         "whisper_encoder.onnx.data",
