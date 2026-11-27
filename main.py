@@ -59,8 +59,8 @@ SAMPLE_RATE = 16_000
 N_SAMPLES = SAMPLE_RATE * 30
 
 # INT8 model filenames
-ENCODER_MODEL = "whisper_encoder_int8.onnx"
-DECODER_MODEL = "whisper_decoder_int8.onnx"
+ENCODER_MODEL = "whisper_encoder.onnx"
+DECODER_MODEL = "whisper_decoder.onnx"
 encoder_session: Any = None
 decoder_session: Any = None
 whisper_processor: Any = None
@@ -87,9 +87,9 @@ def load_onnx_models() -> None:
 
     
     files = [
-        "whisper_encoder_int8.onnx",
-        #"whisper_encoder.onnx.data",
-        "whisper_decoder_int8.onnx",
+        "whisper_encoder.onnx",
+        "whisper_encoder.onnx.data",
+        "whisper_decoder.onnx",
     ]
     token = os.getenv("HF_TOKEN") or None
     for filename in files:
