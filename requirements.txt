@@ -1,8 +1,7 @@
+
+# Required dependencies
 fastapi
 uvicorn[standard]
-numpy
-onnxruntime
-transformers
-huggingface-hub
-soundfile
-scipy
+python-multipart
+google-genai
+python-dotenv
