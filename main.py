@@ -1,8 +1,7 @@
-# import os
+import os
 # import tempfile
 # import asyncio
 # import json
-
 # from contextlib import asynccontextmanager
 # from math import gcd
 # from pathlib import Path
@@ -34,6 +33,19 @@
 # # N_SAMPLES = SAMPLE_RATE * 30
 # # MODEL_DIR = Path("/tmp/models")
 # # MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # BASE_DIR = Path(__file__).resolve().parent
 
@@ -368,6 +380,12 @@ logger = logging.getLogger(__name__)
 gemini_client: Any = None
 
 
+
+
+
+
+
+
 # --------------------------------------------------
 # APPLICATION LIFESPAN
 # --------------------------------------------------
@@ -399,10 +417,20 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
         gemini_client.close()
 
 
+
 app = FastAPI(
     title="Gemini Audio Transcription API",
     lifespan=lifespan
 )
+
+
+
+
+
+
+
+
+
 
 
 # --------------------------------------------------
@@ -538,6 +566,10 @@ async def audio_page():
     )
 
 
+
+
+
+
 # --------------------------------------------------
 # AUDIO TRANSCRIPTION
 # --------------------------------------------------
@@ -568,6 +600,89 @@ def transcribe_audio(
             "Audio uploaded: %s",
             uploaded_file.name
         )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         if progress_callback:
             progress_callback(40)
@@ -813,6 +928,7 @@ async def transcribe(
 
                 except Exception as exc:
 
+
                     logger.exception(
                         "Transcription failed."
                     )
@@ -880,4 +996,3 @@ async def transcribe(
 
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
-
