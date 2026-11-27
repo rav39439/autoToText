@@ -2,6 +2,6 @@
 # Required dependencies
 fastapi
 uvicorn[standard]
-python-multipart
+#python-multipart
 google-genai
 python-dotenv
